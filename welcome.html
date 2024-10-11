@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanskrit Quiz Game - Welcome</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 32px;
+            color: #007BFF;
+        }
+
+        #playerNameInput {
+            padding: 10px;
+            width: 250px;
+            font-size: 16px;
+            margin-top: 20px;
+            border-radius: 5px;
+            border: 2px solid #007BFF;
+            outline: none;
+        }
+
+        #startGameButton {
+            padding: 15px 30px;
+            margin-top: 20px;
+            font-size: 18px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #startGameButton:hover {
+            background-color: #0056b3;
+        }
+
+        body {
+            background-color: #000;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Sanskrit Quiz Game!</h1>
+        <input type="text" id="playerNameInput" placeholder="Enter your name" />
+        <button id="startGameButton">Start Game</button>
+    </div>
+
+    <script>
+        document.getElementById('startGameButton').addEventListener('click', () => {
+            const playerName = document.getElementById('playerNameInput').value;
+            if (playerName) {
+                localStorage.setItem('playerName', playerName);
+                window.location.href = 'main.html'; 
+            } else {
+                alert("Please enter your name before starting the game!");
+            }
+        });
+    </script>
+</body>
+</html>

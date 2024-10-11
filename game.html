@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanskrit Quiz Game - Play</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #282c34;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: #1a1a1a;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 32px;
+            color: #007BFF;
+            text-align: center;
+        }
+
+        .sidebar {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #007BFF;
+            padding-bottom: 10px;
+        }
+
+        .profile h2,
+        .level-section h3,
+        .lifelines h3,
+        .score-section h3 {
+            margin: 10px 0;
+            text-align: center;
+        }
+
+        .lifeline-button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 5px 0;
+        }
+
+        .lifeline-button:hover {
+            background-color: #0056b3;
+        }
+
+        .game-area {
+            text-align: center;
+        }
+
+        #questionDisplay {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+
+        #optionsDisplay {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .option-button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 15px 20px;
+            margin: 10px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .option-button:hover {
+            background-color: #0056b3;
+        }
+
+        .correct {
+            background-color: #28a745; 
+        }
+
+        .incorrect {
+            background-color: #dc3545; 
+        }
+
+        #timerDisplay {
+            margin: 20px 0;
+            font-size: 20px;
+        }
+
+        #nextQuestionButton {
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        #nextQuestionButton:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+        .used {
+    background-color: #ff0000; 
+    pointer-events: none; 
+}
+#exitButton {
+    background-color: #f44336; 
+    color: white; 
+    border: none; 
+    padding: 10px 20px; 
+    cursor: pointer; 
+}
+
+#exitButton:hover {
+    background-color: #d32f2f; 
+}
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="gameScreen" class="screen active">
+            <h1>Sanskrit Quiz Game</h1>
+            <div class="sidebar">
+                <div class="profile">
+                    <h2>Player: <span id="playerName"></span></h2>
+                </div>
+                <div class="level-section">
+                    <h3>Level: <span id="levelDisplay">1</span></h3>
+                </div>
+                <div class="score-section">
+                    <h3>Score: <span id="scoreDisplay">0</span></h3>
+                </div>
+                <div class="lifelines">
+                    <button id="lifeline50" onclick="useLifeline('lifeline50')">50:50 Lifeline</button>
+                    <button id="phoneAFriend" onclick="useLifeline('phoneAFriend')">Phone a Friend</button>
+                    <button id="askAudience" onclick="useLifeline('askAudience')">Ask the Audience</button>
+                    <button id="switchQuestion" onclick="useLifeline('switchQuestion')">Switch Question</button>
+                </div>
+                
+            </div>
+
+            <div class="game-area">
+                <div id="questionDisplay">What is the Sanskrit word for 'Earth'?</div>
+                <div id="optionsDisplay">
+                    <button class="option-button" data-option="1">Prithvi</button>
+                    <button class="option-button" data-option="2">Agni</button>
+                    <button class="option-button" data-option="3">Vayu</button>
+                    <button class="option-button" data-option="4">Jala</button>
+                </div>
+                <div id="timerDisplay">Time left: <span id="timer">30</span> seconds</div>
+                <button id="nextQuestionButton" class="hidden">Next Question</button>
+             <button id="exitButton" onclick="exitGame()">Exit</button>
+                
+            </div>
+            <audio id="letsPlaySound" src="audio/lets-play.mp3"></audio>
+<audio id="correctSound" src="audio/correct-answer.mp3"></audio>
+<audio id="wrongSound" src="audio/wrong-answer.mp3"></audio>
+<audio id="timerSound" src="audio/30-sec.mp3"></audio>
+
+        </div>
+    </div>
+
+    <script>
+        const playerName = localStorage.getItem('playerName');
+        if (playerName) {
+            document.getElementById('playerName').textContent = playerName;
+        } else {
+            window.location.href = 'welcome.html';
+        }
+    
+        let currentLevel = 1;
+        let timerInterval;
+        let score = 0; 
+    
+        const lifelinesAvailable = {
+            lifeline50: true,
+            phoneAFriend: true,
+            askAudience: true,
+            switchQuestion: true
+        };
+    
+        const questions = [
+            { question: "What is the oldest known text in Sanskrit?", options: ["Vedas", "Upanishads", "Mahabharata", "Ramayana"], answer: 1 },
+            { question: "Which language family does Sanskrit belong to?", options: ["Romance", "Semitic", "Indo-European", "Sino-Tibetan"], answer: 3 },
+            { question: "What does 'Sanskrit' mean?", options: ["Refined", "Divine", "Common", "Sacred"], answer: 1 },
+            { question: "In which country did Sanskrit originate?", options: ["China", "India", "Iran", "Egypt"], answer: 2 },
+            { question: "Which ancient text is known for its philosophical teachings in Sanskrit?", options: ["Mahabharata", "Puranas", "Upanishads", "Vedas"], answer: 3 },
+            { question: "Who is considered the 'Father of Sanskrit Grammar'?", options: ["Patanjali", "Panini", "Kalidasa", "Bhartrihari"], answer: 2 },
+            { question: "Which period is known as the 'Classical Sanskrit' period?", options: ["500 BCE - 500 CE", "1000 BCE - 500 CE", "500 CE - 1000 CE", "1500 BCE - 500 BCE"], answer: 1 },
+            { question: "Which epic poem is primarily written in Sanskrit?", options: ["Iliad", "Mahabharata", "Divine Comedy", "Beowulf"], answer: 2 },
+            { question: "What script is traditionally used to write Sanskrit?", options: ["Cyrillic", "Devanagari", "Latin", "Arabic"], answer: 2 },
+            { question: "Which philosopher wrote the 'Yoga Sutras' in Sanskrit?", options: ["Buddha", "Patanjali", "Vishnu", "Shankara"], answer: 2 },
+            { question: "The Sanskrit word 'Guru' translates to what in English?", options: ["Teacher", "Student", "Friend", "Philosopher"], answer: 1 },
+            { question: "What is the name of the largest ancient Sanskrit lexicon?", options: ["Amarakosha", "Madhushala", "Natyashastra", "Shatapatha Brahmana"], answer: 1 },
+            { question: "What is the main theme of the 'Bhagavad Gita'?", options: ["Love", "War", "Duty", "Wisdom"], answer: 3 },
+            { question: "Which text describes the 'Natyashastra', the art of drama and performance?", options: ["Mahabharata", "Ramayana", "Natyashastra", "Arthashastra"], answer: 3 }
+        ];
+    
+        let currentQuestionIndex = 0;
+    
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            const question = questions[currentQuestionIndex];
+            document.getElementById('questionDisplay').textContent = question.question;
+    
+            const optionsDisplay = document.getElementById('optionsDisplay');
+            optionsDisplay.innerHTML = '';
+    
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-button';
+                button.textContent = option;
+                button.dataset.option = index + 1;
+                button.onclick = () => checkAnswer(index + 1);
+                optionsDisplay.appendChild(button);
+            });
+    
+            let timeLeft = 30;
+            document.getElementById('timer').textContent = timeLeft;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Time's up! Moving to the next question.");
+                    document.getElementById('nextQuestionButton').click();
+                }
+            }, 1000);
+    
+            document.getElementById('nextQuestionButton').classList.add('hidden');
+        }
+    
+        function checkAnswer(selectedOption) {
+            clearInterval(timerInterval);
+            const question = questions[currentQuestionIndex];
+    
+            if (selectedOption === question.answer) {
+                alert("Correct!");
+                score += 10; 
+                document.getElementById('scoreDisplay').textContent = score; 
+                document.querySelector(`.option-button[data-option="${selectedOption}"]`).classList.add('correct');
+            } else {
+                alert("Incorrect! The correct answer was: " + question.options[question.answer - 1]);
+                document.querySelector(`.option-button[data-option="${selectedOption}"]`).classList.add('incorrect');
+                document.querySelector(`.option-button[data-option="${question.answer}"]`).classList.add('correct');
+            }
+    
+            document.getElementById('nextQuestionButton').classList.remove('hidden');
+        }
+    
+        function useLifeline(lifelineType) {
+            if (lifelinesAvailable[lifelineType]) {
+                lifelinesAvailable[lifelineType] = false; 
+                document.getElementById(lifelineType).classList.add('used'); 
+    
+                switch (lifelineType) {
+                    case 'lifeline50':
+                        lifeline50();
+                        break;
+                    case 'phoneAFriend':
+                        phoneAFriend();
+                        break;
+                    case 'askAudience':
+                        askAudience();
+                        break;
+                    case 'switchQuestion':
+                        switchQuestion();
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                alert("This lifeline has already been used!");
+            }
+        }
+    
+        function lifeline50() {
+            const question = questions[currentQuestionIndex];
+            const incorrectOptions = [];
+            for (let i = 0; i < question.options.length; i++) {
+                if (i !== question.answer - 1) {
+                    incorrectOptions.push(i + 1);
+                }
+            }
+            for (let i = 0; i < 2; i++) {
+                const randomIndex = Math.floor(Math.random() * incorrectOptions.length);
+                const optionToRemove = incorrectOptions.splice(randomIndex, 1)[0];
+                document.querySelector(`.option-button[data-option="${optionToRemove}"]`).style.display = 'none';
+            }
+            alert("50:50 Lifeline used! Two incorrect options have been removed.");
+        }
+    
+        function phoneAFriend() {
+            const question = questions[currentQuestionIndex];
+            const suggestion = Math.random() < 0.5 ? question.answer : Math.floor(Math.random() * question.options.length) + 1;
+            alert("Your friend suggests: " + question.options[suggestion - 1]);
+        }
+    
+        function askAudience() {
+            const question = questions[currentQuestionIndex];
+            alert("The audience thinks: " + Math.random().toFixed(2) * 100 + "% think the answer is " + question.options[question.answer - 1]);
+        }
+    
+        function switchQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                alert("You've completed the quiz! Your total score is: " + score);
+            }
+        }
+    
+        document.getElementById('nextQuestionButton').onclick = () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+                document.getElementById('levelDisplay').textContent = currentLevel;
+            } else {
+                alert("You've completed the quiz! Your total score is: " + score);
+            }
+        };
+    
+        loadQuestion();
+        function exitGame() {
+    window.location.href = 'welcome.html'; 
+}
+document.getElementById('letsPlaySound').play();
+
+function playCorrectSound() {
+    document.getElementById('correctSound').play();
+}
+
+function playWrongSound() {
+    document.getElementById('wrongSound').play();
+}
+
+function playTimerSound() {
+    document.getElementById('timerSound').play();
+}
+function checkAnswer(selectedOption) {
+    clearInterval(timerInterval);
+    const question = questions[currentQuestionIndex];
+
+    if (selectedOption === question.answer) {
+        playCorrectSound(); 
+        alert("Correct!");
+        score += 10; 
+        document.getElementById('scoreDisplay').textContent = score; 
+        document.querySelector(`.option-button[data-option="${selectedOption}"]`).classList.add('correct');
+    } else {
+        playWrongSound(); 
+        alert("Incorrect! The correct answer was: " + question.options[question.answer - 1]);
+        document.querySelector(`.option-button[data-option="${selectedOption}"]`).classList.add('incorrect');
+        document.querySelector(`.option-button[data-option="${question.answer}"]`).classList.add('correct');
+    }
+
+    document.getElementById('nextQuestionButton').classList.remove('hidden');
+}
+
+
+    </script>
+    
+</body>
+</html>

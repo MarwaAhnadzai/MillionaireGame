@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanskrit Quiz Game - Main</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background: #1a1a1a;
+            color: white;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 32px;
+            color: #007BFF;
+        }
+
+        h2 {
+            margin: 10px 0;
+            font-size: 24px;
+        }
+
+        .instructions {
+            margin-top: 20px;
+            text-align: left; 
+        }
+
+        .instructions p {
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        #startQuizButton {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #startQuizButton:hover {
+            background-color: #0056b3;
+        }
+
+        body {
+            background-color: #000;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sanskrit Quiz Game - Instructions</h1>
+        <h2>Welcome, <span id="playerName"></span>!</h2>
+        <div class="instructions">
+            <p>Here’s how to play the game:</p>
+                <ul>
+                    <li>Answer multiple-choice questions about Sanskrit words.</li>
+                    <li>You have 30 seconds to answer each question.</li>
+                    <li>You can use lifelines if you're stuck (e.g., 50/50 or Hint).</li>
+                    <li>Advance through the levels as you answer correctly!</li>
+                </ul>
+            <button id="startQuizButton">Start Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const playerName = localStorage.getItem('playerName');
+        if (playerName) {
+            document.getElementById('playerName').textContent = playerName;
+        } else {
+            window.location.href = 'welcome.html';
+        }
+
+        document.getElementById('startQuizButton').addEventListener('click', () => {
+            window.location.href = 'game.html';
+        });
+    </script>
+</body>
+</html>
